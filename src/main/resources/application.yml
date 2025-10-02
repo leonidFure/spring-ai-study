@@ -1,0 +1,36 @@
+# Настройки сервера
+server:
+  port: 8080
+
+# Настройки базы данных PostgreSQL
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spring_ai_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # Настройки JPA/Hibernate
+#   jpa:
+#     hibernate:
+#       ddl-auto: update
+#     show-sql: true
+#     properties:
+#       hibernate:
+#         dialect: org.hibernate.dialect.PostgreSQLDialect
+#         format_sql: true
+
+  # Настройки Spring AI Ollama
+  ai:
+    ollama:
+      base-url: http://localhost:11431
+      chat:
+        model: gemma3:4b-it-qat
+    #   embedding:
+    #     model: mxbai-embed-large:335m
+
+# Настройки логирования
+logging:
+  level:
+    com.example.springaiapp: DEBUG
+    org.springframework.ai: DEBUG

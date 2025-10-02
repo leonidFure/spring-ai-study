@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=spring_ai_db
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11431:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    entrypoint: >
+      /bin/sh -c "
+      ollama serve & 
+      sleep 2 && 
+      ollama pull gemma3:4b-it-qat &&
+      ollama pull mxbai-embed-large:335m &&
+      wait"
+    restart: unless-stopped
+    gpus: all
+volumes:
+  ollama_models:
+    driver: local
+  postgres_data:
+    driver: local
