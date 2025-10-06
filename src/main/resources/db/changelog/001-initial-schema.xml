@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001" author="developer">
+        <comment>Создание начальной схемы базы данных для чатов и сообщений</comment>
+        
+        <!-- Создание таблицы chats -->
+        <createTable tableName="chats">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <!-- Создание таблицы message -->
+        <createTable tableName="message">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chat_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <!-- Создание внешнего ключа для связи message с chats -->
+        <addForeignKeyConstraint
+                baseTableName="message"
+                baseColumnNames="chat_id"
+                constraintName="fk_message_chat_id"
+                referencedTableName="chats"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+        
+        <!-- Создание индексов для оптимизации запросов -->
+        <createIndex tableName="message" indexName="idx_message_chat_id">
+            <column name="chat_id"/>
+        </createIndex>
+        
+        <createIndex tableName="message" indexName="idx_message_created_at">
+            <column name="created_at"/>
+        </createIndex>
+        
+    </changeSet>
+
+</databaseChangeLog>
+

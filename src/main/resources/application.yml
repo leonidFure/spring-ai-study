@@ -9,16 +9,19 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
-
-  # Настройки JPA/Hibernate
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-#     properties:
-#       hibernate:
-#         dialect: org.hibernate.dialect.PostgreSQLDialect
-#         format_sql: true
+  # Настройки JPA
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Настройки Liquibase
+  liquibase:
+    change-log: classpath:db/changelog/master-changelog.xml
+    enabled: true
 
   # Настройки Spring AI Ollama
   ai:

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Основной файл для управления всеми миграциями -->
+    <!-- Здесь будут подключаться отдельные файлы миграций -->
+    
+    <!-- Подключение миграции начальной схемы -->
+    <include file="001-initial-schema.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

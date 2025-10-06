@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGOREV GPT</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Левая боковая панель -->
+        <div class="sidebar">
+            <!-- Заголовок -->
+            <div class="sidebar-header">
+                <h1 class="app-title">LGOREV GPT</h1>
+            </div>
+            
+            <!-- Список чатов -->
+            <div class="chat-list">
+                <div th:each="chat : ${chats}" class="chat-item" th:data-chat-id="${chat.id}">
+                    <span class="chat-name" th:text="${chat.title}">Название чата</span>
+                    <button class="chat-delete" type="button" th:data-chat-id="${chat.id}">×</button>
+                </div>
+            </div>
+            
+            <!-- Создание нового чата -->
+            <div class="new-chat-section">
+                <input type="text" class="new-chat-input" placeholder="Название нового чата" id="newChatTitle">
+                <button class="new-chat-button" type="button" id="createChatBtn">
+                    <span class="button-icon">⭐</span>
+                    BOOM! Новый чат
+                </button>
+            </div>
+        </div>
+        
+        <!-- Основная область чата -->
+        <div class="main-content">
+            <!-- Область сообщений -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Динамические сообщения из базы данных -->
+                <div th:each="message : ${messages}" 
+                     th:class="${'message ' + (message.role.name() == 'USER' ? 'user-message' : 'ai-message')}">
+                    <div class="message-avatar">
+                        <img src="/images/placeholder-avatar.svg" 
+                             th:alt="${message.role.name() == 'USER' ? 'Пользователь' : 'AI'}">
+                    </div>
+                    <div class="message-content">
+                        <div th:class="${'message-bubble ' + (message.role.name() == 'USER' ? 'user-bubble' : 'ai-bubble')}">
+                            <div th:utext="${message.content}"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Сообщение если нет сообщений -->
+                <div th:if="${messages.isEmpty()}" class="no-messages">
+                    <p>Начните новый диалог, отправив сообщение</p>
+                </div>
+            </div>
+            
+            <!-- Поле ввода сообщения -->
+            <div class="message-input-container">
+                <div class="message-input-wrapper">
+                    <input type="text" class="message-input" placeholder="Спрашивай..." id="messageInput">
+                    <button class="send-button" type="button" id="sendMessageBtn">SEND</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для подтверждения удаления -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h3>Подтверждение удаления</h3>
+            <p>Вы уверены, что хотите удалить этот чат?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" type="button">Отмена</button>
+                <button class="btn-confirm" type="button">Удалить</button>
+            </div>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

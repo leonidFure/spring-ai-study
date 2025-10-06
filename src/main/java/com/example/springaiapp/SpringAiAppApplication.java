@@ -19,9 +19,7 @@ public class SpringAiAppApplication {
     }
 
     public static void main(String[] args) {
-        final var run = SpringApplication.run(SpringAiAppApplication.class, args);
-        final var chatClient = run.getBean(ChatClient.class);
-        System.out.println(chatClient.prompt().user("как у тебя дела?").call().content());
+        SpringApplication.run(SpringAiAppApplication.class, args);
     }
 
 }

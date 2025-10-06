@@ -1,0 +1,53 @@
+package com.example.springaiapp.infrastracture.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+/**
+ * Entity для таблицы message
+ * Содержит информацию о сообщениях в чатах
+ */
+@Entity
+@Table(name = "message")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "chat_id", nullable = false)
+    private Long chatId;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    private MessageRole role;
+    
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    private String content;
+    
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    // Связь многие-к-одному с чатом
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_id", insertable = false, updatable = false)
+    private Chat chat;
+    
+    /**
+     * Enum для ролей сообщений (USER, ASSISTANT, SYSTEM)
+     */
+    public enum MessageRole {
+        USER,       // Сообщение от пользователя
+        ASSISTANT,  // Ответ от AI ассистента
+        SYSTEM      // Системное сообщение
+    }
+}
