@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
     private static final String START_MESSAGE = "Начинаю обработку";
-    private static final String USER_MESSAGE = "Сообщение пользователя сохранено";
     private static final String COMPLETE = "Ответ завершен";
 
     private final MessageRepository messageRepository;
@@ -223,21 +221,24 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public SseEmitter generateStreamingResponse(final SendMessageRequest request) {
         final var sseEmitter = new SseEmitter();
-        sseEmitter.send(AiMessageResponse.start(START_MESSAGE));
-
-        sseEmitter.send(AiMessageResponse.userMessage(USER_MESSAGE));
-
+        sendEvent(sseEmitter, AiMessageResponse.start(START_MESSAGE));
         final var messageBuilder = new StringBuilder();
         chatClient.prompt()
+                // отправляем сообщение пользователя в ollama model
                 .user(request.getContent())
-                .advisors(MessageChatMemoryAdvisor.builder(postgresChatMemory)
-                        .conversationId(String.valueOf(request.getChatId())) // идентификатор чата
-                        .build())
+                // подкладываем идентификатор чата chatMemoryAdvisor, чтобы не создавать каждый
+                // раз новый chatMemoryAdvisor
+                // сам chatMemoryAdvisor создается один раз в SpringAiAppApplication и
+                // используется для всех запросов
+                .advisors(it -> it.param(ChatMemory.CONVERSATION_ID, String.valueOf(request.getChatId())))
                 .stream()
                 .chatResponse()
+                // при получении токена отправляем его в SSE
                 .subscribe(response -> processToken(sseEmitter, messageBuilder, response.getResult()),
+                        // при ошибке отправляем ошибку в SSE
                         sseEmitter::completeWithError,
-                        () -> finishEmitt(request, sseEmitter, messageBuilder));
+                        // при завершении отправляем сообщение о завершении в SSE
+                        () -> sendEvent(sseEmitter, AiMessageResponse.complete(COMPLETE)));
         return sseEmitter;
     }
 
@@ -249,8 +250,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @SneakyThrows
-    private void finishEmitt(final SendMessageRequest request, final SseEmitter sseEmitter,
-            final StringBuilder messageBuilder) {
-        sseEmitter.send(AiMessageResponse.complete(COMPLETE));
+    private void sendEvent(final SseEmitter sseEmitter,
+            final AiMessageResponse aiMessageResponse) {
+        sseEmitter.send(aiMessageResponse);
     }
 }

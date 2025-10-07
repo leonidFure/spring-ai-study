@@ -2,6 +2,9 @@
 server:
   port: 8080
 
+app:
+  max-messages: 2
+
 # Настройки базы данных PostgreSQL
 spring:
   datasource:
@@ -36,4 +39,4 @@ spring:
 logging:
   level:
     com.example.springaiapp: DEBUG
-    org.springframework.ai: DEBUG
+    org.springframework.ai: INFO

@@ -245,15 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                                 break;
                                 
-                            case 'user_message':
-                                console.log('Сообщение пользователя сохранено:', aiResponse.message);
-                                // Обновляем статус
-                                if (statusElement) {
-                                    statusElement.textContent = aiResponse.message;
-                                    statusElement.style.display = 'block';
-                                }
-                                break;
-                                
                             case 'ai_message':
                                 // Добавляем новый фрагмент к существующему тексту
                                 messageElement.textContent += aiResponse.message;
