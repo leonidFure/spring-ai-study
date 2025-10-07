@@ -6,7 +6,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -14,10 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.example.springaiapp.api.dto.AiMessageResponse;
-import com.example.springaiapp.api.dto.MessageDto;
+import com.example.springaiapp.api.dto.ResponeMessageDto;
 import com.example.springaiapp.api.dto.SendMessageRequest;
 import com.example.springaiapp.api.mapper.MessageMapper;
-import com.example.springaiapp.infrastracture.entity.Message;
+import com.example.springaiapp.infrastracture.entity.MessageEntity;
 import com.example.springaiapp.infrastracture.repository.ChatRepository;
 import com.example.springaiapp.infrastracture.repository.MessageRepository;
 import com.example.springaiapp.service.MessageService;
@@ -44,6 +47,8 @@ public class MessageServiceImpl implements MessageService {
     private final ChatRepository chatRepository;
     private final MessageMapperService messageMapperService;
     private final ChatClient chatClient;
+    @Qualifier("postgresChatMemory")
+    private final ChatMemory postgresChatMemory;
 
     /**
      * Получение сообщения по ID
@@ -52,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
      * @return сообщение или пустой Optional
      */
     @Override
-    public Optional<MessageDto> getMessageById(final Long id) {
+    public Optional<ResponeMessageDto> getMessageById(final Long id) {
         return messageRepository.findById(id)
                 .map(messageMapper::toDto);
     }
@@ -64,7 +69,7 @@ public class MessageServiceImpl implements MessageService {
      * @return список сообщений в чате
      */
     @Override
-    public List<MessageDto> getMessagesByChatId(final Long chatId) {
+    public List<ResponeMessageDto> getMessagesByChatId(final Long chatId) {
         return messageRepository.findByChatIdOrderByCreatedAtAsc(chatId).stream()
                 .map(messageMapper::toDto)
                 .collect(Collectors.toList());
@@ -79,7 +84,7 @@ public class MessageServiceImpl implements MessageService {
      * @return страница сообщений
      */
     @Override
-    public Page<MessageDto> getMessagesByChatId(final Long chatId, final int page, final int size) {
+    public Page<ResponeMessageDto> getMessagesByChatId(final Long chatId, final int page, final int size) {
         final var pageable = PageRequest.of(page, size);
         return messageRepository.findByChatIdOrderByCreatedAtAsc(chatId, pageable)
                 .map(messageMapper::toDto);
@@ -92,7 +97,7 @@ public class MessageServiceImpl implements MessageService {
      * @return список найденных сообщений
      */
     @Override
-    public List<MessageDto> searchMessagesByContent(final String content) {
+    public List<ResponeMessageDto> searchMessagesByContent(final String content) {
         return messageRepository.findByContentContainingIgnoreCase(content).stream()
                 .map(messageMapper::toDto)
                 .collect(Collectors.toList());
@@ -105,7 +110,7 @@ public class MessageServiceImpl implements MessageService {
      * @return последнее сообщение или пустой Optional
      */
     @Override
-    public Optional<MessageDto> getLastMessageInChat(final Long chatId) {
+    public Optional<ResponeMessageDto> getLastMessageInChat(final Long chatId) {
         final var messages = messageRepository.findLastMessageInChat(chatId);
         return messages.isEmpty() ? Optional.empty() : Optional.of(messageMapper.toDto(messages.get(0)));
     }
@@ -118,7 +123,7 @@ public class MessageServiceImpl implements MessageService {
      * @return список сообщений, созданных после указанной даты
      */
     @Override
-    public List<MessageDto> getMessagesAfterDate(final Long chatId, final LocalDateTime dateFrom) {
+    public List<ResponeMessageDto> getMessagesAfterDate(final Long chatId, final LocalDateTime dateFrom) {
         return messageRepository.findByChatIdAndCreatedAtAfterOrderByCreatedAtAsc(chatId, dateFrom).stream()
                 .map(messageMapper::toDto)
                 .collect(Collectors.toList());
@@ -154,7 +159,7 @@ public class MessageServiceImpl implements MessageService {
      */
     @Override
     @Transactional
-    public MessageDto sendMessage(final SendMessageRequest request) {
+    public ResponeMessageDto sendMessage(final SendMessageRequest request) {
         // Проверяем существование чата
         if (!chatRepository.existsById(request.getChatId())) {
             throw new IllegalArgumentException("Чат не найден");
@@ -179,7 +184,7 @@ public class MessageServiceImpl implements MessageService {
      */
     @Override
     @Transactional
-    public Message createUserMessage(final SendMessageRequest request) {
+    public MessageEntity createUserMessage(final SendMessageRequest request) {
         return messageMapperService.createUserMessage(request);
     }
 
@@ -191,7 +196,7 @@ public class MessageServiceImpl implements MessageService {
      */
     @Override
     @Transactional
-    public Message saveMessage(final Message message) {
+    public MessageEntity saveMessage(final MessageEntity message) {
         return messageRepository.save(message);
     }
 
@@ -203,7 +208,7 @@ public class MessageServiceImpl implements MessageService {
      * @return созданное сообщение ассистента
      */
     @Override
-    public Message createAssistantMessage(final Long chatId, final String content) {
+    public MessageEntity createAssistantMessage(final Long chatId, final String content) {
         return messageMapperService.createAssistantMessage(chatId, content);
     }
 
@@ -219,11 +224,16 @@ public class MessageServiceImpl implements MessageService {
     public SseEmitter generateStreamingResponse(final SendMessageRequest request) {
         final var sseEmitter = new SseEmitter();
         sseEmitter.send(AiMessageResponse.start(START_MESSAGE));
-        final var userMessage = messageMapperService.createUserMessage(request);
-        messageRepository.save(userMessage);
+
         sseEmitter.send(AiMessageResponse.userMessage(USER_MESSAGE));
+
         final var messageBuilder = new StringBuilder();
-        chatClient.prompt().user(request.getContent()).stream()
+        chatClient.prompt()
+                .user(request.getContent())
+                .advisors(MessageChatMemoryAdvisor.builder(postgresChatMemory)
+                        .conversationId(String.valueOf(request.getChatId())) // идентификатор чата
+                        .build())
+                .stream()
                 .chatResponse()
                 .subscribe(response -> processToken(sseEmitter, messageBuilder, response.getResult()),
                         sseEmitter::completeWithError,
@@ -232,17 +242,15 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @SneakyThrows
-    private void processToken(final SseEmitter sseEmitter, final StringBuilder messageBuilder, final Generation result) {
+    private void processToken(final SseEmitter sseEmitter, final StringBuilder messageBuilder,
+            final Generation result) {
         sseEmitter.send(AiMessageResponse.aiMessage(result.getOutput().getText()));
         messageBuilder.append(result.getOutput().getText());
     }
 
     @SneakyThrows
-    private void finishEmitt(final SendMessageRequest request, final SseEmitter sseEmitter, final StringBuilder messageBuilder) {
-        final var assistantMessage = messageMapperService.createAssistantMessage(
-                request.getChatId(),
-                messageBuilder.toString());
-        messageRepository.save(assistantMessage);
+    private void finishEmitt(final SendMessageRequest request, final SseEmitter sseEmitter,
+            final StringBuilder messageBuilder) {
         sseEmitter.send(AiMessageResponse.complete(COMPLETE));
     }
 }

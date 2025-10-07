@@ -1,6 +1,6 @@
 package com.example.springaiapp.infrastracture.repository;
 
-import com.example.springaiapp.infrastracture.entity.Message;
+import com.example.springaiapp.infrastracture.entity.MessageEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,14 +16,14 @@ import java.util.List;
  * Предоставляет методы для CRUD операций и поиска сообщений
  */
 @Repository
-public interface MessageRepository extends JpaRepository<Message, Long> {
+public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     
     /**
      * Поиск всех сообщений в указанном чате
      * @param chatId идентификатор чата
      * @return список сообщений в чате
      */
-    List<Message> findByChatIdOrderByCreatedAtAsc(Long chatId);
+    List<MessageEntity> findByChatIdOrderByCreatedAtAsc(Long chatId);
     
     /**
      * Поиск сообщений в чате с пагинацией
@@ -31,7 +31,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * @param pageable параметры пагинации
      * @return страница сообщений
      */
-    Page<Message> findByChatIdOrderByCreatedAtAsc(Long chatId, Pageable pageable);
+    Page<MessageEntity> findByChatIdOrderByCreatedAtAsc(Long chatId, Pageable pageable);
     
     
     /**
@@ -39,7 +39,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * @param content содержимое для поиска
      * @return список сообщений, содержащих указанный текст
      */
-    List<Message> findByContentContainingIgnoreCase(String content);
+    List<MessageEntity> findByContentContainingIgnoreCase(String content);
     
     
     
@@ -49,7 +49,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * @param dateFrom дата начала периода
      * @return список сообщений, созданных после указанной даты
      */
-    List<Message> findByChatIdAndCreatedAtAfterOrderByCreatedAtAsc(Long chatId, LocalDateTime dateFrom);
+    List<MessageEntity> findByChatIdAndCreatedAtAfterOrderByCreatedAtAsc(Long chatId, LocalDateTime dateFrom);
     
     /**
      * Подсчет количества сообщений в чате
@@ -64,8 +64,17 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * @param chatId идентификатор чата
      * @return последнее сообщение в чате или null
      */
-    @Query("SELECT m FROM Message m WHERE m.chatId = :chatId ORDER BY m.createdAt DESC")
-    List<Message> findLastMessageInChat(@Param("chatId") Long chatId);
+    @Query("SELECT m FROM MessageEntity m WHERE m.chatId = :chatId ORDER BY m.createdAt DESC")
+    List<MessageEntity> findLastMessageInChat(@Param("chatId") Long chatId);
+    
+        /**
+        * Поиск последних n сообщений в чате
+     * @param chatId идентификатор чата
+     * @param n количество сообщений
+     * @return последние n сообщений в чате или null
+     */
+    @Query("SELECT m FROM MessageEntity m WHERE m.chatId = :chatId ORDER BY m.createdAt DESC LIMIT :n")
+    List<MessageEntity> findLastMessageInChatTopN(@Param("chatId") Long chatId, @Param("n") int n);
     
     /**
      * Удаление всех сообщений в указанном чате

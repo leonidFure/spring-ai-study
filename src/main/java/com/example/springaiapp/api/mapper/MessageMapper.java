@@ -1,24 +1,27 @@
 package com.example.springaiapp.api.mapper;
 
-import com.example.springaiapp.api.dto.MessageDto;
-import com.example.springaiapp.api.dto.SendMessageRequest;
-import com.example.springaiapp.infrastracture.entity.Message;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.example.springaiapp.api.dto.ResponeMessageDto;
+import com.example.springaiapp.api.dto.SendMessageRequest;
+import com.example.springaiapp.infrastracture.entity.MessageEntity;
+
 /**
  * Маппер для конвертации между Message Entity и MessageDto
+/**
+ * Маппер для конвертации между MessageEntity и MessageDto
  */
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
-    
+
     /**
-     * Конвертация Message Entity в MessageDto
+     * Конвертация MessageEntity в ResponeMessageDto
      * @param message сущность сообщения
      * @return DTO сообщения
      */
-    MessageDto toDto(Message message);
+    ResponeMessageDto toDto(MessageEntity message);
     
     /**
      * Конвертация SendMessageRequest в Message Entity
@@ -28,8 +31,7 @@ public interface MessageMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "chat", ignore = true)
-    Message toEntity(SendMessageRequest request);
-    
+    MessageEntity toEntity(SendMessageRequest request);
     
     /**
      * Обновление Message Entity из SendMessageRequest
@@ -39,7 +41,7 @@ public interface MessageMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "chat", ignore = true)
-    void updateFromRequest(SendMessageRequest request, @MappingTarget Message message);
+    void updateFromRequest(SendMessageRequest request, @MappingTarget MessageEntity message);
     
     /**
      * Обновление содержимого сообщения
@@ -51,5 +53,5 @@ public interface MessageMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "chat", ignore = true)
-    void updateContent(String content, @MappingTarget Message message);
+    void updateContent(String content, @MappingTarget MessageEntity message);
 }

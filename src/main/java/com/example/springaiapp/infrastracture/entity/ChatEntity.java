@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Chat {
+public class ChatEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,5 +33,5 @@ public class Chat {
     
     // Связь один-ко-многим с сообщениями
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Message> messages;
+    private List<MessageEntity> messages;
 }

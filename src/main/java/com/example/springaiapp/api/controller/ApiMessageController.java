@@ -1,6 +1,6 @@
 package com.example.springaiapp.api.controller;
 
-import com.example.springaiapp.api.dto.MessageDto;
+import com.example.springaiapp.api.dto.ResponeMessageDto;
 import com.example.springaiapp.api.dto.SendMessageRequest;
 import com.example.springaiapp.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class ApiMessageController {
      * @return ответ AI
      */
     @PostMapping
-    public ResponseEntity<MessageDto> sendMessage(@Valid @RequestBody SendMessageRequest request) {
+    public ResponseEntity<ResponeMessageDto> sendMessage(@Valid @RequestBody SendMessageRequest request) {
         try {
             return ResponseEntity.ok( messageService.sendMessage(request));
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class ApiMessageController {
      * @return список сообщений
      */
     @GetMapping("/chat/{chatId}")
-    public ResponseEntity<List<MessageDto>> getMessagesByChatId(@PathVariable Long chatId) {
+    public ResponseEntity<List<ResponeMessageDto>> getMessagesByChatId(@PathVariable Long chatId) {
         try {
             final var messages = messageService.getMessagesByChatId(chatId, 0, 100).getContent();
             return ResponseEntity.ok(messages);

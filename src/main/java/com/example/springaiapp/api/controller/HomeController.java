@@ -1,15 +1,15 @@
 package com.example.springaiapp.api.controller;
 
-import com.example.springaiapp.api.dto.ChatDto;
-import com.example.springaiapp.api.dto.MessageDto;
-import com.example.springaiapp.service.ChatService;
-import com.example.springaiapp.service.MessageService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
+import com.example.springaiapp.service.ChatService;
+import com.example.springaiapp.service.MessageService;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Главный контроллер для отображения чат-интерфейса

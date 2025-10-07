@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.ai.chat.messages.MessageType;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
+public class MessageEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +29,7 @@ public class Message {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
-    private MessageRole role;
+    private MessageType role;
     
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -40,14 +41,6 @@ public class Message {
     // Связь многие-к-одному с чатом
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id", insertable = false, updatable = false)
-    private Chat chat;
+    private ChatEntity chat;
     
-    /**
-     * Enum для ролей сообщений (USER, ASSISTANT, SYSTEM)
-     */
-    public enum MessageRole {
-        USER,       // Сообщение от пользователя
-        ASSISTANT,  // Ответ от AI ассистента
-        SYSTEM      // Системное сообщение
-    }
 }

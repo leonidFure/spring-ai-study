@@ -18,7 +18,7 @@ public class ChatDto {
     private Long id;
     private String title;
     private LocalDateTime createdAt;
-    private List<MessageDto> messages;
+    private List<ResponeMessageDto> messages;
     private Long messageCount;
     
     /**

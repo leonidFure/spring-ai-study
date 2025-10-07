@@ -1,8 +1,8 @@
 package com.example.springaiapp.service;
 
-import com.example.springaiapp.api.dto.MessageDto;
+import com.example.springaiapp.api.dto.ResponeMessageDto;
 import com.example.springaiapp.api.dto.SendMessageRequest;
-import com.example.springaiapp.infrastracture.entity.Message;
+import com.example.springaiapp.infrastracture.entity.MessageEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,7 +22,7 @@ public interface MessageService {
      * @param id идентификатор сообщения
      * @return сообщение или пустой Optional
      */
-    Optional<MessageDto> getMessageById(Long id);
+    Optional<ResponeMessageDto> getMessageById(Long id);
 
     /**
      * Получение всех сообщений в чате
@@ -30,7 +30,7 @@ public interface MessageService {
      * @param chatId идентификатор чата
      * @return список сообщений в чате
      */
-    List<MessageDto> getMessagesByChatId(Long chatId);
+    List<ResponeMessageDto> getMessagesByChatId(Long chatId);
 
     /**
      * Получение сообщений в чате с пагинацией
@@ -40,7 +40,7 @@ public interface MessageService {
      * @param size   размер страницы
      * @return страница сообщений
      */
-    Page<MessageDto> getMessagesByChatId(Long chatId, int page, int size);
+    Page<ResponeMessageDto> getMessagesByChatId(Long chatId, int page, int size);
 
     /**
      * Поиск сообщений по содержимому
@@ -48,7 +48,7 @@ public interface MessageService {
      * @param content содержимое для поиска
      * @return список найденных сообщений
      */
-    List<MessageDto> searchMessagesByContent(String content);
+    List<ResponeMessageDto> searchMessagesByContent(String content);
 
     /**
      * Получение последнего сообщения в чате
@@ -56,7 +56,7 @@ public interface MessageService {
      * @param chatId идентификатор чата
      * @return последнее сообщение или пустой Optional
      */
-    Optional<MessageDto> getLastMessageInChat(Long chatId);
+    Optional<ResponeMessageDto> getLastMessageInChat(Long chatId);
 
     /**
      * Получение сообщений, созданных после указанной даты в чате
@@ -65,7 +65,7 @@ public interface MessageService {
      * @param dateFrom дата начала периода
      * @return список сообщений, созданных после указанной даты
      */
-    List<MessageDto> getMessagesAfterDate(Long chatId, LocalDateTime dateFrom);
+    List<ResponeMessageDto> getMessagesAfterDate(Long chatId, LocalDateTime dateFrom);
 
     /**
      * Получение количества сообщений в чате
@@ -88,7 +88,7 @@ public interface MessageService {
      * @param request данные сообщения
      * @return ответное сообщение
      */
-    MessageDto sendMessage(SendMessageRequest request);
+    ResponeMessageDto sendMessage(SendMessageRequest request);
 
     /**
      * Создание сообщения пользователя
@@ -96,7 +96,7 @@ public interface MessageService {
      * @param request данные сообщения
      * @return созданное сообщение пользователя
      */
-    Message createUserMessage(SendMessageRequest request);
+    MessageEntity createUserMessage(SendMessageRequest request);
 
     /**
      * Сохранение сообщения
@@ -104,7 +104,7 @@ public interface MessageService {
      * @param message сообщение для сохранения
      * @return сохраненное сообщение
      */
-    Message saveMessage(Message message);
+    MessageEntity saveMessage(MessageEntity message);
 
     /**
      * Создание сообщения ассистента
@@ -113,7 +113,7 @@ public interface MessageService {
      * @param content содержимое сообщения
      * @return созданное сообщение ассистента
      */
-    Message createAssistantMessage(Long chatId, String content);
+    MessageEntity createAssistantMessage(Long chatId, String content);
 
     /**
      * Генерация потокового ответа (имитация)

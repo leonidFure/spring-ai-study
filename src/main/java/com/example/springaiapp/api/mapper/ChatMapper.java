@@ -2,7 +2,7 @@ package com.example.springaiapp.api.mapper;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;
-import com.example.springaiapp.infrastracture.entity.Chat;
+import com.example.springaiapp.infrastracture.entity.ChatEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -20,7 +20,7 @@ public interface ChatMapper {
      */
     @Mapping(target = "messages", ignore = true)
     @Mapping(target = "messageCount", ignore = true)
-    ChatDto toDto(Chat chat);
+    ChatDto toDto(ChatEntity chat);
     
     /**
      * Конвертация Chat Entity в ChatDto с сообщениями
@@ -28,7 +28,7 @@ public interface ChatMapper {
      * @return DTO чата с сообщениями
      */
     @Mapping(target = "messageCount", expression = "java(chat.getMessages() != null ? (long) chat.getMessages().size() : 0L)")
-    ChatDto toDtoWithMessages(Chat chat);
+    ChatDto toDtoWithMessages(ChatEntity chat);
     
     /**
      * Конвертация CreateChatRequest в Chat Entity
@@ -38,7 +38,7 @@ public interface ChatMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "messages", ignore = true)
-    Chat toEntity(CreateChatRequest request);
+    ChatEntity toEntity(CreateChatRequest request);
     
     
     /**
@@ -49,5 +49,5 @@ public interface ChatMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "messages", ignore = true)
-    void updateFromRequest(CreateChatRequest request, @MappingTarget Chat chat);
+    void updateFromRequest(CreateChatRequest request, @MappingTarget ChatEntity chat);
 }

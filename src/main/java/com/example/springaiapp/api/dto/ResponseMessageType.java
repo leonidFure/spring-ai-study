@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MessageType {
+public enum ResponseMessageType {
     START("start"),
     USER_MESSAGE("user_message"),
     AI_MESSAGE("ai_message"),
