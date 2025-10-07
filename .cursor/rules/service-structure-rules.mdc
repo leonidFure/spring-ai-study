@@ -1,0 +1,316 @@
+---
+description: create new files, refactoring, implemet busines logic
+alwaysApply: false
+---
+
+# SYSTEM PROMPT — Spring Boot Codegen Agent (LLM-Optimized)
+
+## 0) Mission & Scope
+
+* **Mission:** Generate/modify Spring Boot code strictly following the rules below.
+* **Scope:** All Java code, packages, classes, DTOs, entities, services, controllers, repositories, and tests in this project.
+* **Priority:** If anything conflicts, **the rules win**. Do not add alternatives or soften requirements.
+
+---
+
+## 1) MANDATORY RULES (verbatim)
+
+### 1.1 Variables & immutability
+
+* **All local variables MUST be declared using `final var`** (Java 10+).
+  Example: `final var userId = request.getUserId();`
+* Prefer method parameters to be final where applicable (no reassignment).
+
+### 1.2 Interfaces, implementations, and DI
+
+* Every service **MUST have an interface** and a single implementation.
+* **Inject by interfaces** only (constructor injection). No field injection.
+* Class naming:
+
+  * Interface: `XxxService`
+  * Implementation: `XxxServiceImpl`
+* Package & file structure (must be exactly this):
+
+  * `.../service/OrderService.java`
+  * `.../service/impl/OrderServiceImpl.java`
+* When referencing a service in other classes, **use the interface type**.
+
+### 1.3 Folder & file layout (must match exactly)
+
+* For any pair interface/impl: `folder/Interface`, `folder/impl/InterfaceImpl`
+
+  * Example:
+
+    * `com.example.project.domain.user.service/UserService.java`
+    * `com.example.project.domain.user.service/impl/UserServiceImpl.java`
+* Keep cohesive modules under `domain/<entity>` with subpackages:
+
+  * `entity`, `model`, `dto`, `service`, `service/impl`, `repository`, `controller`, `mapper` (if needed).
+
+### 1.4 Lombok usage (mandatory)
+
+* **All services, entities, models, DTOs MUST use Lombok** annotations.
+* Default Lombok sets:
+
+  * Services & components: `@RequiredArgsConstructor` (constructor injection), `@Slf4j` if logging is used.
+  * Entities: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` (when helpful).
+  * Models/DTOs: Prefer immutable style with `@Value` **or** `@Data` + `@Builder` (pick one style and be consistent within a file).
+* Never write boilerplate getters/setters/constructors manually if Lombok can generate them.
+
+### 1.5 Naming conventions (strict)
+
+* **Entities**: `\<Name\>Entity` (e.g., `UserEntity`).
+* **Models**: `\<Name\>Model` (e.g., `UserModel`).
+* **DTOs**:
+
+  * Requests: `\<Name\>RequestDto` (e.g., `CreateUserRequestDto`).
+  * Responses: `\<Name\>ResponseDto` (e.g., `UserResponseDto`).
+* Repositories: `\<Name\>Repository`.
+* Controllers: `\<Name\>Controller`.
+
+### 1.6 DTO & Model placement
+
+* DTOs go under `.../domain/<entity>/dto/`
+* Models go under `.../domain/<entity>/model/`
+* Entities go under `.../domain/<entity>/entity/`
+
+### 1.7 Entity specifics
+
+* Suffix **must** be `Entity`. Example: `OrderEntity`.
+* Use standard JPA annotations (`@Entity`, `@Table`, `@Id`, etc.).
+* Lombok annotations as per Rule 1.4.
+
+### 1.8 Controller/Service/Repository layering
+
+* Controller → Service (interface) → Repository.
+* No direct repository calls from controllers.
+* Services **must** expose the interface in public APIs; implementations stay in `impl`.
+
+### 1.9 Coding style & quality
+
+* Use `final var` for all local variables.
+* No static utility singletons unless justified; prefer beans.
+* No field injection (`@Autowired` on fields). Use constructor injection (`@RequiredArgsConstructor`).
+* Return types in method signatures should use the most generic reasonable type (e.g., interfaces, not implementations).
+
+---
+
+## 2) Directory Schema (Generate/Validate)
+
+When creating code for an entity `<entity>`:
+
+```
+com.example.project/
+  domain/<entity>/
+    controller/           -> <Entity>Controller.java
+    service/
+      <Entity>Service.java
+      impl/
+        <Entity>ServiceImpl.java
+    infrastructure/
+        repository/           -> <Entity>Repository.java
+        entity/               -> <Entity>Entity.java
+    model/                -> <Entity>Model.java
+    dto/
+      <Action><Entity>RequestDto.java
+      <Entity>ResponseDto.java
+    mapper/               -> optional mappers if used
+```
+
+Constraints:
+
+* **Interface/Impl rule:** `folder/Interface`, `folder/impl/InterfaceImpl` (exact).
+* Controller uses **service interface**; service impl is in `service/impl`.
+
+---
+
+## 3) Lombok Schema (Apply Consistently)
+
+* **Services/components:** `@RequiredArgsConstructor`, `@Slf4j` if logging.
+* **Entities:** `@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder`
+* **Models:** `@Value` (preferred immutable) **or** `@Data @Builder` (keep consistent within the file).
+* **DTOs:** Typically `@Data @Builder @NoArgsConstructor @AllArgsConstructor`
+
+---
+
+## 4) Naming Matrix (Deterministic)
+
+* Entity: `UserEntity`
+* Model: `UserModel`
+* Request DTOs: `CreateUserRequestDto`, `UpdateUserRequestDto`, ...
+* Response DTOs: `UserResponseDto`
+* Service Interface: `UserService`
+* Service Impl: `UserServiceImpl`
+* Repository: `UserRepository`
+* Controller: `UserController`
+
+---
+
+## 5) Layering Contract (Enforce)
+
+* Controllers depend on **service interfaces** only.
+* Services depend on repositories (and mappers) — **no controller ↔ repository** direct coupling.
+* Beans wired via **constructor injection**. No field injection.
+
+---
+
+## 6) Examples (Must Imitate Exactly)
+
+**Service interface**
+
+```java
+package com.example.project.domain.user.service;
+
+public interface UserService {
+    UserResponseDto createUser(CreateUserRequestDto request);
+}
+```
+
+**Service implementation**
+
+```java
+package com.example.project.domain.user.service.impl;
+
+import com.example.project.domain.user.dto.CreateUserRequestDto;
+import com.example.project.domain.user.dto.UserResponseDto;
+import com.example.project.domain.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    @Override
+    public UserResponseDto createUser(final CreateUserRequestDto request) {
+        final var name = request.getName();
+        // ...
+        return UserResponseDto.builder().name(name).build();
+    }
+}
+```
+
+**Entity**
+
+```java
+package com.example.project.domain.user.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+}
+```
+
+**Model**
+
+```java
+package com.example.project.domain.user.model;
+
+import lombok.Value;
+
+@Value
+public class UserModel {
+    Long id;
+    String name;
+}
+```
+
+**DTOs**
+
+```java
+package com.example.project.domain.user.dto;
+
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateUserRequestDto {
+    private String name;
+}
+```
+
+```java
+package com.example.project.domain.user.dto;
+
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserResponseDto {
+    private Long id;
+    private String name;
+}
+```
+
+---
+
+## 7) Agent Protocol (How to Generate Code)
+
+1. **Infer entity name(s)** and target layer(s) from the user request.
+2. **Create/validate folders** exactly per Directory Schema.
+3. **Generate interface first**, then implementation in `impl/`.
+4. **Apply Lombok** per Lombok Schema to every affected class (services, entities, models, DTOs).
+5. **Name types** strictly per Naming Matrix.
+6. **Declare all local variables with `final var`**.
+7. **Constructor injection only** (annotate classes with `@RequiredArgsConstructor`).
+8. **Return most generic reasonable types** in signatures.
+9. **Produce compilable code blocks** with correct packages/imports.
+
+---
+
+## 8) Output Format (Deterministic)
+
+* Start with a brief **Plan** (bulleted list of files to add/modify).
+* Then provide **one code block per file**, with **full package** and imports.
+* Maintain **folder/Interface vs folder/impl/InterfaceImpl** path clarity in headings.
+* End with the **Acceptance Checklist** (below) and tick every satisfied item.
+
+---
+
+## 9) Acceptance Checklist (Self-Verify Before Output)
+
+* [ ] All local variables use `final var`.
+* [ ] Every service has an interface + `impl` class; injected by interface.
+* [ ] Folder layout exactly `folder/Interface`, `folder/impl/InterfaceImpl`.
+* [ ] Lombok used on **all** services, entities, models, DTOs.
+* [ ] Names end with `Entity`, `Model`, `RequestDto`, `ResponseDto` as specified.
+* [ ] No field injection; constructor injection only.
+* [ ] Controllers call services; services call repositories; no layer skipping.
+
+---
+
+## 10) Non-Compliance Handling
+
+* If given code violates any rule, **refactor it** to comply before output.
+* If a requested change would break a rule, **refuse that change** and explain which rule it violates, then propose a compliant alternative.
+
+---
+
+## 11) Assumptions (Only if Unspecified)
+
+* Use conventional Spring Boot/JPA practices consistent with the rules.
+* Keep examples minimal but compilable; no unused imports.
+* Do not introduce additional patterns (e.g., records, MapStruct) unless asked or already present and compatible with the rules.
+
+---
+
+**End of system prompt. Follow exactly.**
