@@ -18,6 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
     
     function init() {
+        // Отладочная информация
+        console.log('Инициализация приложения с темной темой');
+        console.log('window.lastChatId:', window.lastChatId);
+        console.log('currentChatId до инициализации:', currentChatId);
+        
+        // Инициализируем темную тему
+        initDarkTheme();
+        
+        // Проверяем, что все необходимые элементы найдены
+        if (!messageInput || !sendButton || !chatMessages) {
+            console.error('Не найдены необходимые элементы DOM');
+            return;
+        }
+        
         // Обработчики событий для отправки сообщений
         sendButton.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', function(e) {
@@ -84,6 +98,28 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Автофокус на поле ввода
         messageInput.focus();
+        
+        // Автоматически выбираем последний чат при загрузке (после инициализации обработчиков)
+        if (window.lastChatId) {
+            console.log('Автоматически выбираем последний чат:', window.lastChatId);
+            // Используем setTimeout чтобы убедиться, что DOM полностью загружен
+            setTimeout(() => {
+                selectChat(window.lastChatId);
+            }, 100);
+        } else {
+            console.log('lastChatId не передан, проверяем наличие чатов в DOM');
+            // Если lastChatId не передан, попробуем выбрать первый доступный чат
+            setTimeout(() => {
+                const firstChat = document.querySelector('.chat-item');
+                if (firstChat) {
+                    const chatId = firstChat.dataset.chatId;
+                    console.log('Выбираем первый доступный чат:', chatId);
+                    selectChat(chatId);
+                } else {
+                    console.log('Чатов в DOM не найдено');
+                }
+            }, 100);
+        }
     }
     
     // Отправка сообщения
@@ -91,18 +127,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = messageInput.value.trim();
         if (!message) return;
         
+        // Проверяем, что выбран чат
+        if (!currentChatId) {
+            console.error('Не выбран чат для отправки сообщения');
+            alert('Пожалуйста, выберите чат для отправки сообщения');
+            return;
+        }
+        
         // Добавляем сообщение пользователя в интерфейс
         addMessageToChat(message, 'user');
         
         // Очищаем поле ввода
         messageInput.value = '';
         
-        // Показываем индикатор загрузки
-        showLoadingIndicator();
-        
         try {
-            // Отправляем сообщение на сервер
-            const response = await fetch('/api/messages', {
+            // Используем стриминговый API для получения ответа
+            await sendStreamingMessage(message);
+            
+        } catch (error) {
+            console.error('Ошибка:', error);
+            addMessageToChat('Извините, произошла ошибка при обработке вашего сообщения.', 'ai');
+        }
+    }
+    
+    // Отправка стримингового сообщения через SSE
+    async function sendStreamingMessage(message) {
+        return new Promise((resolve, reject) => {
+            // Создаем контейнер для стримингового ответа
+            const streamingMessageDiv = addMessageToChat('', 'ai');
+            const messageBubble = streamingMessageDiv.querySelector('.message-text');
+            
+            // Проверяем, что messageBubble найден
+            if (!messageBubble) {
+                console.error('Не удалось найти элемент .message-text в созданном сообщении');
+                reject(new Error('Ошибка создания элемента сообщения'));
+                return;
+            }
+            
+            // Отправляем POST запрос для инициации стриминга
+            fetch('/api/stream/messages', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,76 +175,174 @@ document.addEventListener('DOMContentLoaded', function() {
                     content: message,
                     role: 'USER'
                 })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при инициации стриминга');
+                }
+                
+                // Получаем поток данных
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                // Функция для чтения потока
+                function readStream() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) {
+                            console.log('Стриминг завершен');
+                            resolve();
+                            return;
+                        }
+                        
+                        // Декодируем полученные данные
+                        buffer += decoder.decode(value, { stream: true });
+                        
+                        // Обрабатываем события SSE
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop(); // Оставляем неполную строку в буфере
+                        
+                        for (const line of lines) {
+                            console.log('Обработка строки:', line);
+                            if (line.trim() === '') continue;
+                            
+                            if (line.startsWith('data:')) {
+                                const data = line.substring(5).trim();
+                                handleSSEEvent(data, messageBubble);
+                            }
+                        }
+                        
+                        // Продолжаем чтение
+                        return readStream();
+                    });
+                }
+                
+                // Функция обработки SSE событий
+                function handleSSEEvent(data, messageElement) {
+                    // Проверяем, что messageElement существует
+                    if (!messageElement) {
+                        console.error('messageElement равен null, пропускаем обработку события');
+                        return;
+                    }
+                    
+                    try {
+                        // Парсим JSON объект AiMessageResponse
+                        const aiResponse = JSON.parse(data);
+                        console.log('Получен AiMessageResponse:', aiResponse);
+                        
+                        // Находим контейнер сообщения и элемент статуса
+                        const messageContainer = messageElement.closest('.message-bubble');
+                        const statusElement = messageContainer ? messageContainer.querySelector('.message-status') : null;
+                        
+                        // Обрабатываем в зависимости от типа сообщения
+                        switch (aiResponse.messageType) {
+                            case 'start':
+                                console.log('Начинаю обработку:', aiResponse.message);
+                                // Показываем статус
+                                if (statusElement) {
+                                    statusElement.textContent = aiResponse.message;
+                                    statusElement.style.display = 'block';
+                                }
+                                break;
+                                
+                            case 'user_message':
+                                console.log('Сообщение пользователя сохранено:', aiResponse.message);
+                                // Обновляем статус
+                                if (statusElement) {
+                                    statusElement.textContent = aiResponse.message;
+                                    statusElement.style.display = 'block';
+                                }
+                                break;
+                                
+                            case 'ai_message':
+                                // Добавляем новый фрагмент к существующему тексту
+                                messageElement.textContent += aiResponse.message;
+                                // Прокручиваем к низу для отображения нового контента
+                                scrollToBottom();
+                                break;
+                                
+                            case 'complete':
+                                console.log('Ответ завершен:', aiResponse.message);
+                                // Обновляем статус
+                                if (statusElement) {
+                                    statusElement.textContent = aiResponse.message;
+                                    statusElement.style.display = 'block';
+                                }
+                                break;
+                                
+                            default:
+                                console.warn('Неизвестный тип сообщения:', aiResponse.messageType);
+                                // Добавляем как обычный текст
+                                messageElement.textContent += aiResponse.message;
+                                scrollToBottom();
+                                break;
+                        }
+                    } catch (error) {
+                        console.error('Ошибка при парсинге JSON:', error, 'Данные:', data);
+                        // Если не удалось распарсить JSON, обрабатываем как обычный текст
+                        if (messageElement) {
+                            messageElement.textContent += data;
+                            scrollToBottom();
+                        }
+                    }
+                }
+                
+                // Начинаем чтение потока
+                readStream().catch(error => {
+                    console.error('Ошибка при чтении потока:', error);
+                    if (messageBubble) {
+                        messageBubble.textContent = 'Ошибка при получении ответа. Попробуйте еще раз.';
+                    }
+                    reject(error);
+                });
+                
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса:', error);
+                if (messageBubble) {
+                    messageBubble.textContent = 'Ошибка при отправке сообщения. Попробуйте еще раз.';
+                }
+                reject(error);
             });
-            
-            if (!response.ok) {
-                throw new Error('Ошибка при отправке сообщения');
-            }
-            
-            const data = await response.json();
-            
-            // Добавляем ответ AI в интерфейс
-            addMessageToChat(data.content, 'ai');
-            
-        } catch (error) {
-            console.error('Ошибка:', error);
-            addMessageToChat('Извините, произошла ошибка при обработке вашего сообщения.', 'ai');
-        } finally {
-            hideLoadingIndicator();
-        }
+        });
     }
+    
     
     // Добавление сообщения в чат
     function addMessageToChat(content, role) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role}-message`;
         
-        const avatar = '/images/placeholder-avatar.svg';
-        const alt = role === 'user' ? 'Пользователь' : 'AI';
+        const currentTime = new Date().toLocaleTimeString('ru-RU', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        const author = role === 'user' ? 'Вы' : 'ИИ Ассистент';
+        const avatarIcon = role === 'user' ? '👤' : '🤖';
         
         messageDiv.innerHTML = `
             <div class="message-avatar">
-                <img src="${avatar}" alt="${alt}" onerror="this.style.display='none'">
+                <div class="avatar-icon">${avatarIcon}</div>
             </div>
             <div class="message-content">
+                <div class="message-header">
+                    <span class="message-author">${author}</span>
+                    <span class="message-time">${currentTime}</span>
+                </div>
                 <div class="message-bubble ${role}-bubble">
-                    <p>${escapeHtml(content)}</p>
+                    <div class="message-status" style="display: none; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-style: italic;"></div>
+                    <div class="message-text">${escapeHtml(content)}</div>
                 </div>
             </div>
         `;
         
         chatMessages.appendChild(messageDiv);
         scrollToBottom();
+        
+        return messageDiv;
     }
     
-    // Показать индикатор загрузки
-    function showLoadingIndicator() {
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'message ai-message sending';
-        loadingDiv.id = 'loadingMessage';
-        
-        loadingDiv.innerHTML = `
-            <div class="message-avatar">
-                <img src="/images/placeholder-avatar.svg" alt="AI">
-            </div>
-            <div class="message-content">
-                <div class="message-bubble ai-bubble">
-                    <p>Думаю...</p>
-                </div>
-            </div>
-        `;
-        
-        chatMessages.appendChild(loadingDiv);
-        scrollToBottom();
-    }
-    
-    // Скрыть индикатор загрузки
-    function hideLoadingIndicator() {
-        const loadingMessage = document.getElementById('loadingMessage');
-        if (loadingMessage) {
-            loadingMessage.remove();
-        }
-    }
     
     // Создание нового чата
     async function createNewChat() {
@@ -225,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Добавление чата в список
     function addChatToList(chat) {
-        const chatList = document.querySelector('.chat-list');
+        const chatItems = document.querySelector('.chat-items');
         const chatItem = document.createElement('div');
         chatItem.className = 'chat-item';
         chatItem.dataset.chatId = chat.id;
@@ -246,24 +407,54 @@ document.addEventListener('DOMContentLoaded', function() {
             showDeleteModal(chat.id);
         });
         
-        chatList.appendChild(chatItem);
+        chatItems.appendChild(chatItem);
+        
+        // Обновляем счетчик чатов
+        updateChatCount();
+    }
+    
+    // Обновление счетчика чатов
+    function updateChatCount() {
+        const chatCount = document.querySelector('.chat-count');
+        const chatItems = document.querySelectorAll('.chat-item');
+        if (chatCount) {
+            chatCount.textContent = chatItems.length;
+        }
     }
     
     // Выбор чата
     function selectChat(chatId) {
+        console.log('Выбираем чат с ID:', chatId);
+        
         // Убираем активный класс со всех чатов
-        chatItems.forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
         
         // Добавляем активный класс к выбранному чату
         const selectedChat = document.querySelector(`[data-chat-id="${chatId}"]`);
         if (selectedChat) {
             selectedChat.classList.add('active');
+            console.log('Чат найден и активирован');
+            
+            // Обновляем заголовок чата
+            updateChatHeader(selectedChat.querySelector('.chat-name').textContent);
+        } else {
+            console.warn('Чат с ID', chatId, 'не найден в DOM');
+            updateChatHeader('Выберите чат для начала общения');
         }
         
         currentChatId = chatId;
+        console.log('currentChatId установлен в:', currentChatId);
         
         // Загружаем сообщения чата
         loadChatMessages(chatId);
+    }
+    
+    // Обновление заголовка чата
+    function updateChatHeader(chatTitle) {
+        const chatTitleElement = document.getElementById('currentChatTitle');
+        if (chatTitleElement) {
+            chatTitleElement.textContent = chatTitle;
+        }
     }
     
     // Загрузка сообщений чата
@@ -333,12 +524,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const chatItem = document.querySelector(`[data-chat-id="${deleteChatId}"]`);
             if (chatItem) {
                 chatItem.remove();
+                updateChatCount();
             }
             
             // Если удаленный чат был активным, очищаем область сообщений
             if (currentChatId === deleteChatId) {
                 currentChatId = null;
                 chatMessages.innerHTML = '';
+                updateChatHeader('Выберите чат для начала общения');
             }
             
             hideDeleteModal();
@@ -370,4 +563,35 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('unhandledrejection', function(e) {
         console.error('Необработанная ошибка промиса:', e.reason);
     });
+    
+    // Инициализация темной темы
+    function initDarkTheme() {
+        // Устанавливаем темную тему для браузера
+        document.documentElement.style.colorScheme = 'dark';
+        
+        // Добавляем класс для темной темы к body
+        document.body.classList.add('dark-theme');
+        
+        // Настраиваем скроллбары для темной темы
+        const style = document.createElement('style');
+        style.textContent = `
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: var(--bg-tertiary);
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: var(--border-secondary);
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--text-muted);
+            }
+        `;
+        document.head.appendChild(style);
+        
+        console.log('Темная тема инициализирована');
+    }
 });

@@ -29,8 +29,7 @@ public class ApiMessageController {
     @PostMapping
     public ResponseEntity<MessageDto> sendMessage(@Valid @RequestBody SendMessageRequest request) {
         try {
-            MessageDto response = messageService.sendMessage(request);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok( messageService.sendMessage(request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -44,7 +43,7 @@ public class ApiMessageController {
     @GetMapping("/chat/{chatId}")
     public ResponseEntity<List<MessageDto>> getMessagesByChatId(@PathVariable Long chatId) {
         try {
-            List<MessageDto> messages = messageService.getMessagesByChatId(chatId, 0, 100).getContent();
+            final var messages = messageService.getMessagesByChatId(chatId, 0, 100).getContent();
             return ResponseEntity.ok(messages);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

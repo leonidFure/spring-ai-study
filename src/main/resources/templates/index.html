@@ -3,9 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LGOREV GPT</title>
+    <title>LGOREV GPT - ИИ Ассистент</title>
+    <meta name="description" content="Современный ИИ ассистент с темным дизайном">
+    <meta name="color-scheme" content="dark">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+        /* Дополнительные стили для темной темы */
+        body {
+            color-scheme: dark;
+        }
+        
+        /* Улучшенные тени для темной темы */
+        .message-bubble {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chat-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .new-chat-button:hover,
+        .send-button:hover {
+            box-shadow: 0 6px 16px rgba(96, 165, 250, 0.3);
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -13,14 +37,24 @@
         <div class="sidebar">
             <!-- Заголовок -->
             <div class="sidebar-header">
-                <h1 class="app-title">LGOREV GPT</h1>
+                <h1 class="app-title">
+                    <span class="app-icon">🤖</span>
+                    LGOREV GPT
+                </h1>
+                <p class="app-subtitle">ИИ Ассистент нового поколения</p>
             </div>
             
             <!-- Список чатов -->
             <div class="chat-list">
-                <div th:each="chat : ${chats}" class="chat-item" th:data-chat-id="${chat.id}">
-                    <span class="chat-name" th:text="${chat.title}">Название чата</span>
-                    <button class="chat-delete" type="button" th:data-chat-id="${chat.id}">×</button>
+                <div class="chat-list-header">
+                    <h3 class="chat-list-title">Чаты</h3>
+                    <div class="chat-count" th:text="${#lists.size(chats)}">0</div>
+                </div>
+                <div class="chat-items">
+                    <div th:each="chat : ${chats}" class="chat-item" th:data-chat-id="${chat.id}">
+                        <span class="chat-name" th:text="${chat.title}">Название чата</span>
+                        <button class="chat-delete" type="button" th:data-chat-id="${chat.id}" title="Удалить чат">×</button>
+                    </div>
                 </div>
             </div>
             
@@ -28,41 +62,58 @@
             <div class="new-chat-section">
                 <input type="text" class="new-chat-input" placeholder="Название нового чата" id="newChatTitle">
                 <button class="new-chat-button" type="button" id="createChatBtn">
-                    <span class="button-icon">⭐</span>
-                    BOOM! Новый чат
+                    Новый чат
                 </button>
             </div>
         </div>
         
         <!-- Основная область чата -->
         <div class="main-content">
+            <!-- Заголовок чата -->
+            <div class="chat-header" id="chatHeader">
+                <h2 class="current-chat-title" id="currentChatTitle">Выберите чат для начала общения</h2>
+            </div>
+            
             <!-- Область сообщений -->
             <div class="chat-messages" id="chatMessages">
                 <!-- Динамические сообщения из базы данных -->
                 <div th:each="message : ${messages}" 
                      th:class="${'message ' + (message.role.name() == 'USER' ? 'user-message' : 'ai-message')}">
                     <div class="message-avatar">
-                        <img src="/images/placeholder-avatar.svg" 
-                             th:alt="${message.role.name() == 'USER' ? 'Пользователь' : 'AI'}">
+                        <div class="avatar-icon" th:if="${message.role.name() == 'USER'}">👤</div>
+                        <div class="avatar-icon" th:if="${message.role.name() != 'USER'}">🤖</div>
                     </div>
                     <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author" th:text="${message.role.name() == 'USER' ? 'Вы' : 'ИИ Ассистент'}">Автор</span>
+                            <span class="message-time" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">Время</span>
+                        </div>
                         <div th:class="${'message-bubble ' + (message.role.name() == 'USER' ? 'user-bubble' : 'ai-bubble')}">
-                            <div th:utext="${message.content}"></div>
+                            <div class="message-text" th:utext="${message.content}"></div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Сообщение если нет сообщений -->
                 <div th:if="${messages.isEmpty()}" class="no-messages">
-                    <p>Начните новый диалог, отправив сообщение</p>
+                    <div class="no-messages-content">
+                        <div class="no-messages-icon">💬</div>
+                        <h3>Добро пожаловать в LGOREV GPT!</h3>
+                        <p>Начните новый диалог, отправив сообщение ниже</p>
+                        <div class="suggestions">
+                            <div class="suggestion-item">Расскажи о себе</div>
+                            <div class="suggestion-item">Помоги с программированием</div>
+                            <div class="suggestion-item">Объясни сложную тему</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Поле ввода сообщения -->
             <div class="message-input-container">
                 <div class="message-input-wrapper">
-                    <input type="text" class="message-input" placeholder="Спрашивай..." id="messageInput">
-                    <button class="send-button" type="button" id="sendMessageBtn">SEND</button>
+                    <input type="text" class="message-input" placeholder="Введите ваше сообщение..." id="messageInput">
+                    <button class="send-button" type="button" id="sendMessageBtn">Отправить</button>
                 </div>
             </div>
         </div>
@@ -81,5 +132,9 @@
     </div>
     
     <script th:src="@{/js/app.js}"></script>
+    <script th:if="${lastChatId != null}">
+        // Передаем ID последнего чата в JavaScript
+        window.lastChatId = /*[[${lastChatId}]]*/ null;
+    </script>
 </body>
 </html>

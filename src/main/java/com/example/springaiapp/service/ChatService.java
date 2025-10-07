@@ -38,10 +38,10 @@ public class ChatService {
      */
     @Transactional
     public ChatDto createChat(CreateChatRequest request) {
-        Chat chat = chatMapper.toEntity(request);
+        final var chat = chatMapper.toEntity(request);
         chat.setCreatedAt(LocalDateTime.now());
         
-        Chat savedChat = chatRepository.save(chat);
+        final var savedChat = chatRepository.save(chat);
         return chatMapper.toDto(savedChat);
     }
     
@@ -66,14 +66,14 @@ public class ChatService {
     }
     
     /**
-     * Получение всех чатов с пагинацией
+     * Получение всех чатов с пагинацией (отсортированных по дате создания, новые первыми)
      * @param page номер страницы
      * @param size размер страницы
      * @return страница чатов
      */
     public Page<ChatDto> getAllChats(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return chatRepository.findAll(pageable)
+        final var pageable = PageRequest.of(page, size);
+        return chatRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(chatMapper::toDto);
     }
     

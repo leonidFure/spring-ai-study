@@ -26,15 +26,16 @@ import java.util.Optional;
 @RequestMapping("/chats")
 @RequiredArgsConstructor
 public class ChatController {
-    
+
     private final ChatService chatService;
-    
+
     /**
      * Главная страница со списком всех чатов
-     * @param page номер страницы (по умолчанию 0)
-     * @param size размер страницы (по умолчанию 10)
+     * 
+     * @param page   номер страницы (по умолчанию 0)
+     * @param size   размер страницы (по умолчанию 10)
      * @param search поисковый запрос (опционально)
-     * @param model модель для передачи данных в представление
+     * @param model  модель для передачи данных в представление
      * @return имя шаблона
      */
     @GetMapping
@@ -42,19 +43,20 @@ public class ChatController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
-        Page<ChatDto> chats  = chatService.getAllChats(page, size);
+        Page<ChatDto> chats = chatService.getAllChats(page, size);
         model.addAttribute("chats", chats.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", chats.getTotalPages());
         model.addAttribute("totalElements", chats.getTotalElements());
         model.addAttribute("isSearch", false);
-        
+
         model.addAttribute("chatCount", chatService.getChatCount());
         return "chats/list";
     }
-    
+
     /**
      * Страница создания нового чата
+     * 
      * @param model модель для передачи данных в представление
      * @return имя шаблона
      */
@@ -63,11 +65,12 @@ public class ChatController {
         model.addAttribute("createChatRequest", new CreateChatRequest());
         return "chats/create";
     }
-    
+
     /**
      * Обработка создания нового чата
-     * @param request данные для создания чата
-     * @param bindingResult результаты валидации
+     * 
+     * @param request            данные для создания чата
+     * @param bindingResult      результаты валидации
      * @param redirectAttributes атрибуты для редиректа
      * @return редирект на страницу чата или форму создания
      */
@@ -76,13 +79,13 @@ public class ChatController {
             @Valid @ModelAttribute CreateChatRequest request,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
-        
+
         if (bindingResult.hasErrors()) {
             return "chats/create";
         }
-        
+
         try {
-            ChatDto createdChat = chatService.createChat(request);
+            final var createdChat = chatService.createChat(request);
             redirectAttributes.addFlashAttribute("successMessage", "Чат успешно создан!");
             return "redirect:/chats/" + createdChat.getId();
         } catch (Exception e) {
@@ -90,39 +93,36 @@ public class ChatController {
             return "redirect:/chats/new";
         }
     }
-    
+
     /**
      * Страница просмотра конкретного чата с сообщениями
-     * @param id идентификатор чата
+     * 
+     * @param id    идентификатор чата
      * @param model модель для передачи данных в представление
      * @return имя шаблона или редирект
      */
     @GetMapping("/{id}")
     public String getChat(@PathVariable Long id, Model model) {
-        Optional<ChatDto> chatOpt = chatService.getChatWithMessages(id);
-        
-        if (chatOpt.isEmpty()) {
-            return "redirect:/chats?error=chat_not_found";
-        }
-        
-        ChatDto chat = chatOpt.get();
-        model.addAttribute("chat", chat);
-        model.addAttribute("messageCount", chat.getMessageCount());
-        
-        return "chats/detail";
+        return chatService.getChatWithMessages(id)
+                .map(chat -> {
+                    model.addAttribute("chat", chat);
+                    model.addAttribute("messageCount", chat.getMessageCount());
+                    return "chats/detail";
+                })
+                .orElse("redirect:/chats?error=chat_not_found");
     }
-    
-    
+
     /**
      * Удаление чата
-     * @param id идентификатор чата
+     * 
+     * @param id                 идентификатор чата
      * @param redirectAttributes атрибуты для редиректа
      * @return редирект на список чатов
      */
     @PostMapping("/{id}/delete")
     public String deleteChat(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            boolean deleted = chatService.deleteChat(id);
+            final var deleted = chatService.deleteChat(id);
             if (deleted) {
                 redirectAttributes.addFlashAttribute("successMessage", "Чат успешно удален!");
             } else {
@@ -131,8 +131,8 @@ public class ChatController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении чата: " + e.getMessage());
         }
-        
+
         return "redirect:/chats";
     }
-    
+
 }
