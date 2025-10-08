@@ -86,11 +86,13 @@ public class FileContentLoadServiceImpl implements FileContentLoadService {
 
     private LoadedContentModel processResource(final Map.Entry<Pair<String, String>, Resource> entry) {
         log.info("Processing resource: {}", entry.getKey().getFirst());
+        // читаем файл и конвертируем в Document - контейнер контента и метададанных документа
         final var document = new TextReader(entry.getValue()).get();
+        // разбиваем документа на чанки по заданным размерам
+        // размер указан в конфигурации VectorConfiguration
         final var chunks = textSplitter.apply(document);
-        // в стартере уже есть репозиторий и ентити, нам надо создать таблицу
-        // vector_store, если зохотим другое название, то это можно настроить
-        // 
+        // с помощью embedding модели конвертируем чанки в вектора
+        // вектора добавляем в векторное хранилище
         vectorStore.accept(chunks);
         return loadedContentMapperService.createLoadedContentModel(
                 entry.getKey().getFirst(),

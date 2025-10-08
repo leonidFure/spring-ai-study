@@ -5,7 +5,9 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +50,12 @@ public class ChatClientConfiguration {
 
     private Advisor ragAdvisor() {
         return QuestionAnswerAdvisor.builder(vectorStore)
+                // для настройки промпта,с которым ллм идет в векторное хранилище
+                // .promptTemplate(new PromptTemplate("TODOD"))
+                .searchRequest(SearchRequest.builder()
+                .topK(10)
+                        
+                .build())
                 .build();
     }
 
