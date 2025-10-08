@@ -1,11 +1,12 @@
-package com.example.springaiapp.service.impl;
+package com.example.springaiapp.domain.loadedcontent.service.impl;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;
 import com.example.springaiapp.api.mapper.ChatMapper;
+import com.example.springaiapp.domain.loadedcontent.service.ChatService;
 import com.example.springaiapp.infrastracture.repository.ChatRepository;
 import com.example.springaiapp.infrastracture.repository.MessageRepository;
-import com.example.springaiapp.service.ChatService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

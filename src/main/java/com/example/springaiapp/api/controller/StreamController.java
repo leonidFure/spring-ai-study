@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.example.springaiapp.api.dto.SendMessageRequest;
-import com.example.springaiapp.service.MessageService;
+import com.example.springaiapp.domain.loadedcontent.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

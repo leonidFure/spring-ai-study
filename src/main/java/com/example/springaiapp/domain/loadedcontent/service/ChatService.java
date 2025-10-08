@@ -1,4 +1,4 @@
-package com.example.springaiapp.service;
+package com.example.springaiapp.domain.loadedcontent.service;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;

@@ -1,4 +1,4 @@
-package com.example.springaiapp.config;
+package com.example.springaiapp.domain.loadedcontent.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,7 +8,6 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.lang.NonNull;
 
 import com.example.springaiapp.infrastracture.repository.MessageRepository;
-import com.example.springaiapp.service.mappers.MessageMapperService;
 
 import jakarta.transaction.Transactional;
 import lombok.Builder;
@@ -18,7 +17,7 @@ import lombok.Builder;
 // т.е. если мы хотим хранить 2 сообщения в контексте модели, то в бд должно быть 2 сообщения
 // а здесь мы можем просто селектнуть последние maxMessages сообщения из бд
 @Builder
-public class PostgresChatMemory implements ChatMemory {
+public class PostgresChatMemoryService implements ChatMemory {
     private final long maxMessages;
     private final MessageRepository messageRepository;
     private final MessageMapperService messageMapperService;

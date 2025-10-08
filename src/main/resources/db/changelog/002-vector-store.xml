@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002" author="developer">
+        <comment>Создание таблиц для векторного хранилища и загруженного контента</comment>
+
+        <!-- Создание расширения vector для работы с векторными данными -->
+        <sql>CREATE EXTENSION IF NOT EXISTS vector;</sql>
+
+        <!-- Создание таблицы loaded_content -->
+        <createTable tableName="loaded_content">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="filename" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hash" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chunk_count" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="loaded_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Создание таблицы vector_store -->
+        <createTable tableName="vector_store">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="embedding" type="VECTOR(1024)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Создание уникального ограничения для loaded_content по hash + filename -->
+        <addUniqueConstraint tableName="loaded_content" columnNames="hash, filename" constraintName="uk_loaded_content_hash_filename"/>
+
+        <sql>CREATE INDEX IF NOT EXISTS vector_store_hnsw_index
+    ON vector_store USING hnsw (embedding vector_cosine_ops);</sql>
+
+
+    </changeSet>
+
+</databaseChangeLog>

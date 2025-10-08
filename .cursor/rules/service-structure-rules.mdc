@@ -1,8 +1,6 @@
 ---
-description: create new files, refactoring, implemet busines logic
-alwaysApply: false
+alwaysApply: true
 ---
-
 # SYSTEM PROMPT — Spring Boot Codegen Agent (LLM-Optimized)
 
 ## 0) Mission & Scope
@@ -54,7 +52,7 @@ alwaysApply: false
 
   * Services & components: `@RequiredArgsConstructor` (constructor injection), `@Slf4j` if logging is used.
   * Entities: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` (when helpful).
-  * Models/DTOs: Prefer immutable style with `@Value` **or** `@Data` + `@Builder` (pick one style and be consistent within a file).
+  * Models/DTOs: Prefer immutable style with `@Data` + `@Builder` (pick one style and be consistent within a file).
 * Never write boilerplate getters/setters/constructors manually if Lombok can generate them.
 
 ### 1.5 Naming conventions (strict)
@@ -128,7 +126,7 @@ Constraints:
 
 * **Services/components:** `@RequiredArgsConstructor`, `@Slf4j` if logging.
 * **Entities:** `@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder`
-* **Models:** `@Value` (preferred immutable) **or** `@Data @Builder` (keep consistent within the file).
+* **Models:** `@Data @Builder` (keep consistent within the file).
 * **DTOs:** Typically `@Data @Builder @NoArgsConstructor @AllArgsConstructor`
 
 ---
@@ -221,12 +219,15 @@ public class UserEntity {
 ```java
 package com.example.project.domain.user.model;
 
-import lombok.Value;
+import lombok.*;
 
-@Value
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserModel {
-    Long id;
-    String name;
+    private final Long id;
+    private final String name;
 }
 ```
 

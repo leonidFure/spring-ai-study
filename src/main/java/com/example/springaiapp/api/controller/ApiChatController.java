@@ -2,7 +2,8 @@ package com.example.springaiapp.api.controller;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;
-import com.example.springaiapp.service.ChatService;
+import com.example.springaiapp.domain.loadedcontent.service.ChatService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

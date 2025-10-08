@@ -10,5 +10,8 @@
     
     <!-- Подключение миграции начальной схемы -->
     <include file="001-initial-schema.xml" relativeToChangelogFile="true"/>
+    
+    <!-- Подключение миграции векторного хранилища -->
+    <include file="002-vector-store.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
