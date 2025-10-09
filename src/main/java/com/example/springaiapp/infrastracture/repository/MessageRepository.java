@@ -71,14 +71,14 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     List<MessageEntity> findLastMessageInChat(@Param("chatId") Long chatId);
 
     /**
-     * Поиск последних n сообщений в чате
+     * Поиск новых n сообщений в чате
      * 
      * @param chatId идентификатор чата
-     * @param n      количество сообщений
-     * @return последние n сообщений в чате или null
+     * @param n      количество сообщений которые пропускаем
+     * @return новые n сообщений в чате или null
      */
-    @Query("SELECT m FROM MessageEntity m WHERE m.chatId = :chatId ORDER BY m.createdAt DESC LIMIT :n")
-    List<MessageEntity> findLastMessageInChatTopN(@Param("chatId") Long chatId, @Param("n") long n);
+    @Query("SELECT m FROM MessageEntity m WHERE m.chatId = :chatId ORDER BY m.createdAt OFFSET :n")
+    List<MessageEntity> findNewestMessagesInChatTopN(@Param("chatId") Long chatId, @Param("n") long n);
 
     /**
      * Удаление всех сообщений в указанном чате

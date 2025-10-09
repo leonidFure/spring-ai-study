@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.util.Pair;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(prefix = "app.file-content-load", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class FileContentLoadServiceImpl implements FileContentLoadService {
     private final LoadedContentService loadedContentService;

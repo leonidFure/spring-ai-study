@@ -3,7 +3,9 @@ server:
   port: 8080
 
 app:
-  max-messages: 2
+  max-messages: 10
+  file-content-load:
+    enabled: false
 
 # Настройки базы данных PostgreSQL
 spring:
@@ -39,4 +41,5 @@ spring:
 logging:
   level:
     com.example.springaiapp: DEBUG
-    org.springframework.ai: INFO
+    org.springframework.ai: info
+    org.springframework.ai.chat.client.advisor: debug

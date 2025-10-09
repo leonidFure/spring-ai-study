@@ -2,6 +2,7 @@ package com.example.springaiapp.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -39,7 +40,7 @@ public class ChatClientConfiguration {
                 // advisor для памяти модели должен работать перед advisor для векторного
                 // хранилища, чтобы в памяти модели был контекст перед тем,
                 // как идти в векторное хранилище
-                .defaultAdvisors(chatMemoryAdvisor(), ragAdvisor())
+                .defaultAdvisors(chatMemoryAdvisor()/* , ragAdvisor() */, SimpleLoggerAdvisor.builder().build())
                 .build();
     }
 
@@ -52,10 +53,14 @@ public class ChatClientConfiguration {
         return QuestionAnswerAdvisor.builder(vectorStore)
                 // для настройки промпта,с которым ллм идет в векторное хранилище
                 // .promptTemplate(new PromptTemplate("TODOD"))
-                .searchRequest(SearchRequest.builder()
-                .topK(10)
-                        
-                .build())
+                // .searchRequest(SearchRequest.builder()
+                //         // количество документов, которые будут возвращаться
+                //         .topK(5)
+                //         // 0..1, чем больше, тем строже (меньше документов будет возвращаться)
+                //         .similarityThreshold(0.75) 
+                //         // мета-фильтр
+                //         .filterExpression("source == 'docs/webflux_guide.txt'")
+                //         .build())
                 .build();
     }
 

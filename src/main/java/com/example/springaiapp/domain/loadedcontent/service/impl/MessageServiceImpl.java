@@ -237,7 +237,10 @@ public class MessageServiceImpl implements MessageService {
                         // при ошибке отправляем ошибку в SSE
                         sseEmitter::completeWithError,
                         // при завершении отправляем сообщение о завершении в SSE
-                        () -> sendEvent(sseEmitter, AiMessageResponse.complete(COMPLETE)));
+                        () -> {
+                            sendEvent(sseEmitter, AiMessageResponse.complete(COMPLETE));
+                            sseEmitter.complete();
+                        });
         return sseEmitter;
     }
 

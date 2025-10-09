@@ -11,11 +11,13 @@ import com.example.springaiapp.infrastracture.repository.MessageRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 // используем свою реализацию, т.к. в MessageWindowChatMemory нет разделения
 // между тем, сколько сообщений хранить в памяти модели и сколько в базе данных
 // т.е. если мы хотим хранить 2 сообщения в контексте модели, то в бд должно быть 2 сообщения
 // а здесь мы можем просто селектнуть последние maxMessages сообщения из бд
+@Slf4j
 @Builder
 public class PostgresChatMemoryService implements ChatMemory {
     private final long maxMessages;
@@ -33,7 +35,10 @@ public class PostgresChatMemoryService implements ChatMemory {
     @Override
     @NonNull
     public List<Message> get(String conversationId) {
-        return messageRepository.findLastMessageInChatTopN(Long.parseLong(conversationId), maxMessages)
+        final var count = messageRepository.countByChatId(Long.parseLong(conversationId));
+        return messageRepository
+                .findNewestMessagesInChatTopN(Long.parseLong(conversationId),
+                        count > maxMessages ? count - maxMessages : 0)
                 .stream()
                 .map(it -> messageMapperService.toMessage(it))
                 .collect(Collectors.toList());
