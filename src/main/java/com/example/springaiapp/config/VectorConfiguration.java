@@ -15,7 +15,7 @@ public class VectorConfiguration {
     @Bean
     public TextSplitter textSplitter() {
         return TokenTextSplitter.builder()
-                .withChunkSize(500) // todo сделать configurable
+                .withChunkSize(250) // todo сделать configurable
                 .build();
     }
 }

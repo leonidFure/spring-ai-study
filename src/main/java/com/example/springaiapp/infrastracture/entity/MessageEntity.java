@@ -47,23 +47,4 @@ public class MessageEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id", insertable = false, updatable = false)
     private ChatEntity chat;
-
-
-    public static Message toMessage(MessageEntity entity) {
-        return switch (entity.getRole()) {
-            case USER -> new UserMessage(entity.getContent());
-            case ASSISTANT -> new AssistantMessage(entity.getContent());
-            case SYSTEM -> new SystemMessage(entity.getContent());
-            default -> throw new IllegalArgumentException("Invalid message type: " + entity.getRole());
-        };
-    }
-
-    public static MessageEntity toEntity(Message message, Long chatId) {
-        final var entity = new MessageEntity();
-        entity.setChatId(chatId);
-        entity.setRole(message.getMessageType());
-        entity.setContent(message.getText());
-        entity.setCreatedAt(LocalDateTime.now());
-        return entity;
-    }
 }

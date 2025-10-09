@@ -6,9 +6,9 @@
 -- drop table vector_store;
 -- select * from loaded_content;
 
-select * from vector_store;
+-- select * from vector_store;
 
-select * from loaded_content;
+-- select * from loaded_content;
 
--- truncate table vector_store;
--- truncate table loaded_content;
+truncate table vector_store;
+truncate table loaded_content;

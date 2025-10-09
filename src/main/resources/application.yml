@@ -5,7 +5,7 @@ server:
 app:
   max-messages: 10
   file-content-load:
-    enabled: false
+    enabled: true
 
 # Настройки базы данных PostgreSQL
 spring:

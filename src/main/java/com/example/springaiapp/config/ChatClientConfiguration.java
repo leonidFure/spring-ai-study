@@ -6,6 +6,7 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -40,7 +41,35 @@ public class ChatClientConfiguration {
                 // advisor для памяти модели должен работать перед advisor для векторного
                 // хранилища, чтобы в памяти модели был контекст перед тем,
                 // как идти в векторное хранилище
-                .defaultAdvisors(chatMemoryAdvisor()/* , ragAdvisor() */, SimpleLoggerAdvisor.builder().build())
+                .defaultAdvisors(chatMemoryAdvisor(),
+                        SimpleLoggerAdvisor.builder().build(), 
+                        ragAdvisor(),
+                        SimpleLoggerAdvisor.builder().build())
+                .defaultOptions(ChatOptions.builder()
+                        // ограничевает выбор K самых вероятных токенов, из которых потом выбирается
+                        // следующий.
+                        // k=1 - всегда выбирается 1 самый вероятный токен
+                        // k=10 - выбирается 10 самых вероятных токенов
+                        // Рекомендации:
+                        // 1-10 - для стабильных, точных ответов
+                        // 40-100 - для более вариативных/творческих ответов
+                        .topK(20)
+                        // выбирает набор токенов, чья суммарная вероятность не превышает topP
+                        // topP=1.0 - все токены учитываются
+                        // topP=0.7 - учитываются только 70% самых вероятных токенов
+                        // Рекомендации:
+                        // 0.8–0.95 - баланса реалистичности и креативности
+                        // 0.5–0.8 - для строгих, точных ответов
+                        .topP(0.7)
+                        // регулирует случайность (креативность) ответов
+                        // 0.0 - самый детерминированный ответ
+                        // 1.0 - самый случайный ответ
+                        // Рекомендации:
+                        // 0-0.3 - технические задачи
+                        // 0.7-1.0 - творческие задачи
+                        // 0.3-0.7 - средний уровень
+                        .temperature(0.3)
+                        .build())
                 .build();
     }
 
@@ -54,13 +83,13 @@ public class ChatClientConfiguration {
                 // для настройки промпта,с которым ллм идет в векторное хранилище
                 // .promptTemplate(new PromptTemplate("TODOD"))
                 // .searchRequest(SearchRequest.builder()
-                //         // количество документов, которые будут возвращаться
-                //         .topK(5)
-                //         // 0..1, чем больше, тем строже (меньше документов будет возвращаться)
-                //         .similarityThreshold(0.75) 
-                //         // мета-фильтр
-                //         .filterExpression("source == 'docs/webflux_guide.txt'")
-                //         .build())
+                // // количество документов, которые будут возвращаться
+                // .topK(5)
+                // // 0..1, чем больше, тем строже (меньше документов будет возвращаться)
+                // .similarityThreshold(0.75)
+                // // мета-фильтр
+                // .filterExpression("source == 'docs/webflux_guide.txt'")
+                // .build())
                 .build();
     }
 

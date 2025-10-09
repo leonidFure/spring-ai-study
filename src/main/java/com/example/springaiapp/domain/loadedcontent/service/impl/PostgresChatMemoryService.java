@@ -35,6 +35,13 @@ public class PostgresChatMemoryService implements ChatMemory {
     @Override
     @NonNull
     public List<Message> get(String conversationId) {
+        // берем последние maxMessages сообщений из бд
+        // отсортированных по дате создания
+        // начиная со старых сообщений и заканчивая новыми
+        // нужно для того, чтобы в модель передавался правильный порядок сообщений
+        // пример, если мы просим каждый раз отдавать нам число на 1 больше чем мы отдали,
+        // у модели будет история 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        // если мы будем просто сортировать по desc, то модели будет история 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 (в обратном порядке)
         final var count = messageRepository.countByChatId(Long.parseLong(conversationId));
         return messageRepository
                 .findNewestMessagesInChatTopN(Long.parseLong(conversationId),
