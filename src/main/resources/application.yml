@@ -4,6 +4,7 @@ server:
 
 app:
   max-messages: 10
+  chunk-size: 250 # обично от 128 до 1000 примерно, в зависимости от модели
   file-content-load:
     enabled: true
 

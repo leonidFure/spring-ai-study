@@ -127,7 +127,7 @@ Constraints:
 * **Services/components:** `@RequiredArgsConstructor`, `@Slf4j` if logging.
 * **Entities:** `@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder`
 * **Models:** `@Data @Builder` (keep consistent within the file).
-* **DTOs:** Typically `@Data @Builder @NoArgsConstructor @AllArgsConstructor`
+* **DTOs:** Typically `@Data @Builder`
 
 ---
 
@@ -223,8 +223,6 @@ import lombok.*;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserModel {
     private final Long id;
     private final String name;
@@ -240,10 +238,8 @@ import lombok.*;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class CreateUserRequestDto {
-    private String name;
+    private final String name;
 }
 ```
 
@@ -254,11 +250,9 @@ import lombok.*;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserResponseDto {
-    private Long id;
-    private String name;
+    private final Long id;
+    private final String name;
 }
 ```
 

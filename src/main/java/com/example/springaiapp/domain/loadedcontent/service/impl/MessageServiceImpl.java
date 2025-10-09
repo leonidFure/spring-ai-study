@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -230,6 +231,8 @@ public class MessageServiceImpl implements MessageService {
                 // сам chatMemoryAdvisor создается один раз в SpringAiAppApplication и
                 // используется для всех запросов
                 .advisors(it -> it.param(ChatMemory.CONVERSATION_ID, String.valueOf(request.getChatId())))
+                // можно для кадого запроса подменять фильтр при необходимости
+                // .advisors(it -> it.param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "type = String"))
                 .stream()
                 .chatResponse()
                 // при получении токена отправляем его в SSE

@@ -1,5 +1,7 @@
 app:
   max-messages: 2
+  file-content-load:
+    enabled: false
 spring:
   liquibase:
     enabled: false

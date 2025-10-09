@@ -25,7 +25,7 @@ services:
       ollama pull mxbai-embed-large:335m &&
       wait"
     restart: unless-stopped
-    gpus: all
+    # gpus: all
 volumes:
   ollama_models:
     driver: local
