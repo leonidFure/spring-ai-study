@@ -42,7 +42,7 @@ public class ChatClientConfiguration {
                 // хранилища, чтобы в памяти модели был контекст перед тем,
                 // как идти в векторное хранилище
                 .defaultAdvisors(chatMemoryAdvisor(),
-                        SimpleLoggerAdvisor.builder().build(), 
+                        SimpleLoggerAdvisor.builder().build(),
                         ragAdvisor(),
                         SimpleLoggerAdvisor.builder().build())
                 .defaultOptions(ChatOptions.builder()
@@ -60,7 +60,7 @@ public class ChatClientConfiguration {
                         // Рекомендации:
                         // 0.8–0.95 - баланса реалистичности и креативности
                         // 0.5–0.8 - для строгих, точных ответов
-                        .topP(0.7)
+                        .topP(0.9)
                         // регулирует случайность (креативность) ответов
                         // 0.0 - самый детерминированный ответ
                         // 1.0 - самый случайный ответ
@@ -82,14 +82,14 @@ public class ChatClientConfiguration {
         return QuestionAnswerAdvisor.builder(vectorStore)
                 // для настройки промпта,с которым ллм идет в векторное хранилище
                 // .promptTemplate(new PromptTemplate("TODOD"))
-                // .searchRequest(SearchRequest.builder()
-                // // количество документов, которые будут возвращаться
-                // .topK(5)
-                // // 0..1, чем больше, тем строже (меньше документов будет возвращаться)
-                // .similarityThreshold(0.75)
-                // // мета-фильтр
-                // .filterExpression("source == 'docs/webflux_guide.txt'")
-                // .build())
+                .searchRequest(SearchRequest.builder()
+                        // // количество документов, которые будут возвращаться
+                        .topK(5)
+                        // // 0..1, чем больше, тем строже (меньше документов будет возвращаться)
+                        .similarityThreshold(0.65)
+                        // // мета-фильтр
+                        // .filterExpression("source == 'docs/webflux_guide.txt'")
+                        .build())
                 .build();
     }
 
