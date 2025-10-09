@@ -68,3 +68,6 @@ build/
 # Application specific
 application-local.properties
 application-dev.properties
+
+# Knowledge base files
+src/main/resources/knowlegebase/
