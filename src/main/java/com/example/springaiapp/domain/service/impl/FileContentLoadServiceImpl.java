@@ -1,4 +1,4 @@
-package com.example.springaiapp.domain.loadedcontent.service.impl;
+package com.example.springaiapp.domain.service.impl;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -17,10 +17,10 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import com.example.springaiapp.domain.loadedcontent.model.LoadedContentModel;
-import com.example.springaiapp.domain.loadedcontent.service.FileContentLoadService;
-import com.example.springaiapp.domain.loadedcontent.service.LoadedContentMapperService;
-import com.example.springaiapp.domain.loadedcontent.service.LoadedContentService;
+import com.example.springaiapp.domain.model.LoadedContentModel;
+import com.example.springaiapp.domain.service.FileContentLoadService;
+import com.example.springaiapp.domain.service.LoadedContentMapperService;
+import com.example.springaiapp.domain.service.LoadedContentService;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

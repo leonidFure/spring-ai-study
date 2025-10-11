@@ -3,10 +3,18 @@ server:
   port: 8080
 
 app:
-  max-messages: 10
-  chunk-size: 250 # обично от 128 до 1000 примерно, в зависимости от модели
+  chunk-size: 250 # обычно от 128 до 1000 примерно, в зависимости от модели
   file-content-load:
     enabled: true
+  chat:
+    memory:
+      enabled: true
+      type: vector
+      max-messages: 10
+    rag:
+      enabled: true
+      top-k: 5
+      similarity-threshold: 0.65
 
 # Настройки базы данных PostgreSQL
 spring:

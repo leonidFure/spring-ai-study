@@ -6,8 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.example.springaiapp.domain.loadedcontent.service.ChatService;
-import com.example.springaiapp.domain.loadedcontent.service.MessageService;
+import com.example.springaiapp.domain.service.ChatService;
+import com.example.springaiapp.domain.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 

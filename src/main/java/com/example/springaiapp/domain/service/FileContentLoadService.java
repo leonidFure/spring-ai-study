@@ -1,4 +1,4 @@
-package com.example.springaiapp.domain.loadedcontent.service;
+package com.example.springaiapp.domain.service;
 
 /*
  * Сервис для загрузки контента из файлов

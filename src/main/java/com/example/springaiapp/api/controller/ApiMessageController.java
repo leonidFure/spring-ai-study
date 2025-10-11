@@ -2,7 +2,7 @@ package com.example.springaiapp.api.controller;
 
 import com.example.springaiapp.api.dto.ResponeMessageDto;
 import com.example.springaiapp.api.dto.SendMessageRequest;
-import com.example.springaiapp.domain.loadedcontent.service.MessageService;
+import com.example.springaiapp.domain.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

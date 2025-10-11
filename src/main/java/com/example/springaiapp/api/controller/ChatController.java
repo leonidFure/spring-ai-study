@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;
-import com.example.springaiapp.domain.loadedcontent.service.ChatService;
+import com.example.springaiapp.domain.service.ChatService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

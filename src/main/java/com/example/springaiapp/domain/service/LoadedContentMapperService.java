@@ -1,6 +1,6 @@
-package com.example.springaiapp.domain.loadedcontent.service;
+package com.example.springaiapp.domain.service;
 
-import com.example.springaiapp.domain.loadedcontent.model.LoadedContentModel;
+import com.example.springaiapp.domain.model.LoadedContentModel;
 
 public interface LoadedContentMapperService {
 

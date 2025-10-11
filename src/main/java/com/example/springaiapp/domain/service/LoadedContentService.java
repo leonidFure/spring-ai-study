@@ -1,12 +1,12 @@
-package com.example.springaiapp.domain.loadedcontent.service;
-
-import com.example.springaiapp.domain.loadedcontent.model.LoadedContentModel;
+package com.example.springaiapp.domain.service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.util.Pair;
+
+import com.example.springaiapp.domain.model.LoadedContentModel;
 
 /**
  * Интерфейс сервиса для работы с загруженным контентом

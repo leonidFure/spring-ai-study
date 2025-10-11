@@ -1,4 +1,4 @@
-package com.example.springaiapp.domain.loadedcontent.service.impl;
+package com.example.springaiapp.domain.service.impl;
 
 import java.time.LocalDateTime;
 

@@ -1,6 +1,6 @@
-package com.example.springaiapp.domain.loadedcontent.mapper;
+package com.example.springaiapp.domain.mapper;
 
-import com.example.springaiapp.domain.loadedcontent.model.LoadedContentModel;
+import com.example.springaiapp.domain.model.LoadedContentModel;
 import com.example.springaiapp.infrastracture.entity.LoadedContentEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

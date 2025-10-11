@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.springaiapp.domain.loadedcontent.service.ChatService;
-import com.example.springaiapp.domain.loadedcontent.service.MessageService;
+import com.example.springaiapp.domain.service.ChatService;
+import com.example.springaiapp.domain.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,8 +1,8 @@
-package com.example.springaiapp.domain.loadedcontent.service.impl;
+package com.example.springaiapp.domain.service.impl;
 
-import com.example.springaiapp.domain.loadedcontent.mapper.LoadedContentMapper;
-import com.example.springaiapp.domain.loadedcontent.model.LoadedContentModel;
-import com.example.springaiapp.domain.loadedcontent.service.LoadedContentService;
+import com.example.springaiapp.domain.mapper.LoadedContentMapper;
+import com.example.springaiapp.domain.model.LoadedContentModel;
+import com.example.springaiapp.domain.service.LoadedContentService;
 import com.example.springaiapp.infrastracture.repository.LoadedContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

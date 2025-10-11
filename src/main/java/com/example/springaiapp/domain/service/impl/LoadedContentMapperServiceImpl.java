@@ -1,9 +1,9 @@
-package com.example.springaiapp.domain.loadedcontent.service.impl;
+package com.example.springaiapp.domain.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import com.example.springaiapp.domain.loadedcontent.model.LoadedContentModel;
-import com.example.springaiapp.domain.loadedcontent.service.LoadedContentMapperService;
+import com.example.springaiapp.domain.model.LoadedContentModel;
+import com.example.springaiapp.domain.service.LoadedContentMapperService;
 
 @Service
 public class LoadedContentMapperServiceImpl implements LoadedContentMapperService {

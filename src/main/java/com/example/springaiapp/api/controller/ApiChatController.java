@@ -2,7 +2,7 @@ package com.example.springaiapp.api.controller;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;
-import com.example.springaiapp.domain.loadedcontent.service.ChatService;
+import com.example.springaiapp.domain.service.ChatService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

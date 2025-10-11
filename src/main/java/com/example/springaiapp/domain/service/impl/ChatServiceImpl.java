@@ -1,9 +1,9 @@
-package com.example.springaiapp.domain.loadedcontent.service.impl;
+package com.example.springaiapp.domain.service.impl;
 
 import com.example.springaiapp.api.dto.ChatDto;
 import com.example.springaiapp.api.dto.CreateChatRequest;
 import com.example.springaiapp.api.mapper.ChatMapper;
-import com.example.springaiapp.domain.loadedcontent.service.ChatService;
+import com.example.springaiapp.domain.service.ChatService;
 import com.example.springaiapp.infrastracture.repository.ChatRepository;
 import com.example.springaiapp.infrastracture.repository.MessageRepository;
 

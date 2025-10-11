@@ -1,4 +1,4 @@
-package com.example.springaiapp.domain.loadedcontent.service.impl;
+package com.example.springaiapp.domain.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,7 +20,7 @@ import com.example.springaiapp.api.dto.AiMessageResponse;
 import com.example.springaiapp.api.dto.ResponeMessageDto;
 import com.example.springaiapp.api.dto.SendMessageRequest;
 import com.example.springaiapp.api.mapper.MessageMapper;
-import com.example.springaiapp.domain.loadedcontent.service.MessageService;
+import com.example.springaiapp.domain.service.MessageService;
 import com.example.springaiapp.infrastracture.entity.MessageEntity;
 import com.example.springaiapp.infrastracture.repository.ChatRepository;
 import com.example.springaiapp.infrastracture.repository.MessageRepository;
