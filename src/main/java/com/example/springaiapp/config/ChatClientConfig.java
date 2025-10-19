@@ -128,7 +128,8 @@ public class ChatClientConfig {
                                                 // emptyContextPromptTemplate
                                                 .allowEmptyContext(true)
                                                 // .emptyContextPromptTemplate(new PromptTemplate(
-                                                //                 "Запрос вне твоей базы знаний, расскажи стишок про это пользователю из 5 строк"))
+                                                // "Запрос вне твоей базы знаний, расскажи стишок про это пользователю
+                                                // из 5 строк"))
                                                 .build())
                                 .documentPostProcessors(BM25DocumentPostProcessor.builder()
                                                 .limit(topK)
