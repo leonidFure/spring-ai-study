@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.example.springaiapp.domain.joiners.BM25DocumentPostProcessor;
 import com.example.springaiapp.domain.service.impl.MessageMapperService;
 import com.example.springaiapp.domain.service.impl.PostgresChatMemoryService;
 import com.example.springaiapp.domain.transformers.ExpansionQueryTransformer;
@@ -44,6 +45,7 @@ public class ChatClientConfig {
                                 // advisor для памяти модели должен работать перед advisor для векторного
                                 // хранилища, чтобы в памяти модели был контекст перед тем,
                                 // как идти в векторное хранилище
+                                .defaultSystem("Ты - Горев Леонид, Java разработчик, ты должен отвечать кратко и лаконично, не используя эмоции и не используя слишком много слов.")
                                 .defaultAdvisors(
                                                 messageChatMemoryAdvisor(10),
                                                 simpleLoggerAdvisor(20),
@@ -109,7 +111,7 @@ public class ChatClientConfig {
                                 .documentRetriever(VectorStoreDocumentRetriever.builder()
                                                 // // 0..1, чем больше, тем строже (меньше документов будет
                                                 // возвращаться)
-                                                .topK(topK)
+                                                .topK(topK * 2)
                                                 .similarityThreshold(similarityThreshold)
                                                 .vectorStore(vectorStore)
                                                 .build())
@@ -124,30 +126,16 @@ public class ChatClientConfig {
                                                 // на плечи ии (если есть ответ в его базе, то он его даст)
                                                 // false - если в контексте ничего не найден, выполняется
                                                 // emptyContextPromptTemplate
-                                                .allowEmptyContext(false)
-                                                .emptyContextPromptTemplate(new PromptTemplate(
-                                                                "Запрос вне твоей базы знаний, расскажи стишок про это пользователю из 5 строк"))
+                                                .allowEmptyContext(true)
+                                                // .emptyContextPromptTemplate(new PromptTemplate(
+                                                //                 "Запрос вне твоей базы знаний, расскажи стишок про это пользователю из 5 строк"))
+                                                .build())
+                                .documentPostProcessors(BM25DocumentPostProcessor.builder()
+                                                .limit(topK)
                                                 .build())
                                 .order(order)
                                 .build();
         }
-
-        // private Advisor questionAnswerAdvisor(int order) {
-        // return QuestionAnswerAdvisor.builder(vectorStore)
-        // // для настройки промпта,с которым ллм идет в векторное хранилище
-        // // .promptTemplate(new PromptTemplate("TODOD"))
-        // .searchRequest(SearchRequest.builder()
-        // // сколько взять документов из rag
-        // .topK(topK)
-        // // // 0..1, чем больше, тем строже (меньше документов будет
-        // // возвращаться)
-        // .similarityThreshold(similarityThreshold)
-        // // // мета-фильтр
-        // // .filterExpression("source == 'docs/webflux_guide.txt'")
-        // .build())
-        // .order(order)
-        // .build();
-        // }
 
         // // представление памяти в рамках чата в векторном хранилище
         // private Advisor

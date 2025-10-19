@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Builder
+@Deprecated(since = "нет необходимости писать свой advisor для rag, т.к. есть RetrievalAugmentationAdvisor")
 public class CustomRagAdvisor implements BaseAdvisor {
     private static final PromptTemplate TEMPLATE = PromptTemplate.builder()
             .template("""
