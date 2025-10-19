@@ -8,11 +8,8 @@ app:
     enabled: true
   chat:
     memory:
-      enabled: true
-      type: vector
       max-messages: 10
     rag:
-      enabled: true
       top-k: 5
       similarity-threshold: 0.65
 

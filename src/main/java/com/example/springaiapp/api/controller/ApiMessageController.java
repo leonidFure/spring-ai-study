@@ -44,6 +44,7 @@ public class ApiMessageController {
     @GetMapping("/chat/{chatId}")
     public ResponseEntity<List<ResponeMessageDto>> getMessagesByChatId(@PathVariable Long chatId) {
         try {
+            
             final var messages = messageService.getMessagesByChatId(chatId, 0, 100).getContent();
             return ResponseEntity.ok(messages);
         } catch (Exception e) {

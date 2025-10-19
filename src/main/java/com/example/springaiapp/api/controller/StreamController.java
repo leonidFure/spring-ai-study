@@ -1,9 +1,7 @@
 package com.example.springaiapp.api.controller;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,15 +37,5 @@ public class StreamController {
     public SseEmitter streamMessage(@RequestBody SendMessageRequest request) {
         log.info("Получен запрос на стриминг: {}", request);
         return messageService.generateStreamingResponse(request);
-    }
-
-    /**
-     * Проверка статуса SSE соединения
-     * 
-     * @return статус соединения
-     */
-    @GetMapping("/status")
-    public ResponseEntity<String> getStatus() {
-        return ResponseEntity.ok("SSE сервис активен");
     }
 }

@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -220,7 +219,7 @@ public class MessageServiceImpl implements MessageService {
     @SneakyThrows
     @Transactional
     public SseEmitter generateStreamingResponse(final SendMessageRequest request) {
-        final var sseEmitter = new SseEmitter();
+        final var sseEmitter = new SseEmitter(120_000L);
         sendEvent(sseEmitter, AiMessageResponse.start(START_MESSAGE));
         final var messageBuilder = new StringBuilder();
         chatClient.prompt()
@@ -233,6 +232,7 @@ public class MessageServiceImpl implements MessageService {
                 .advisors(it -> it.param(ChatMemory.CONVERSATION_ID, String.valueOf(request.getChatId())))
                 // можно для кадого запроса подменять фильтр при необходимости
                 // .advisors(it -> it.param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "type = String"))
+                
                 .stream()
                 .chatResponse()
                 // при получении токена отправляем его в SSE
